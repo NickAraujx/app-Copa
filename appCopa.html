@@ -1,0 +1,776 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>App da Copa — Descrição de Jogador</title>
+  <style>
+    :root{
+      --bg1:#081b3a;
+      --bg2:#06224f;
+      --card:rgba(255,255,255,.06);
+      --card2:rgba(255,255,255,.09);
+      --text:rgba(255,255,255,.92);
+      --muted:rgba(255,255,255,.68);
+      --accent:#ffd84d;
+      --accent2:#ff3b5c;
+      --line:rgba(255,255,255,.12);
+      --shadow: 0 22px 60px rgba(0,0,0,.35);
+      --radius:18px;
+      --radius2:26px;
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      color:var(--text);
+      background:
+        radial-gradient(1200px 600px at 10% -10%, rgba(255,216,77,.35), transparent 55%),
+        radial-gradient(900px 500px at 90% 10%, rgba(255,59,92,.25), transparent 50%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+      min-height:100vh;
+      overflow-x:hidden;
+    }
+
+    .wrap{ max-width:1040px; margin:0 auto; padding:24px 18px 56px; }
+
+    header{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:18px;
+    }
+
+    .brand{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+
+    .kicker{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      color:var(--muted);
+      font-weight:650;
+      letter-spacing:.2px;
+      text-transform:uppercase;
+      font-size:12px;
+    }
+
+    .chip{
+      padding:6px 10px;
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:999px;
+    }
+
+    h1{
+      margin:0;
+      font-size:28px;
+      line-height:1.15;
+      letter-spacing:.2px;
+    }
+
+    .sub{
+      margin:0;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.5;
+      max-width:62ch;
+    }
+
+    .layout{
+      display:grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap:16px;
+      align-items:start;
+    }
+
+    @media (max-width: 900px){
+      .layout{ grid-template-columns: 1fr; }
+    }
+
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:var(--radius2);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      position:relative;
+    }
+
+    .card::before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      background:
+        radial-gradient(500px 200px at 20% 0%, rgba(255,216,77,.25), transparent 60%),
+        radial-gradient(420px 180px at 90% 10%, rgba(255,59,92,.20), transparent 55%);
+      opacity:.9;
+      pointer-events:none;
+    }
+
+    .card > *{ position:relative; }
+
+    .cardHead{
+      padding:18px 18px 10px;
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:14px;
+    }
+
+    .tag{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(0,0,0,.12);
+      color:rgba(255,255,255,.86);
+      font-weight:700;
+      font-size:12px;
+      user-select:none;
+      white-space:nowrap;
+    }
+
+    .tag .dot{
+      width:10px;
+      height:10px;
+      border-radius:50%;
+      background:linear-gradient(180deg, var(--accent), #ff9a1a);
+      box-shadow: 0 0 0 3px rgba(255,216,77,.18);
+    }
+
+    .statsGrid{
+      padding:0 18px 18px;
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:10px;
+    }
+
+    @media (max-width: 520px){
+      .statsGrid{ grid-template-columns: 1fr; }
+    }
+
+    .stat{
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:16px;
+      padding:12px 12px;
+    }
+
+    .stat .label{ color:var(--muted); font-size:12px; font-weight:650; }
+    .stat .value{ font-size:20px; margin-top:6px; font-weight:860; letter-spacing:.3px; }
+
+    .hero{
+      padding:0 18px 18px;
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:12px;
+    }
+
+    .portrait{
+      border-radius:20px;
+      border:1px solid rgba(255,255,255,.12);
+      background:
+        radial-gradient(700px 300px at 40% 0%, rgba(255,216,77,.18), transparent 55%),
+        radial-gradient(450px 220px at 90% 20%, rgba(255,59,92,.16), transparent 50%),
+        rgba(255,255,255,.05);
+      min-height:210px;
+      display:flex;
+      gap:14px;
+      align-items:center;
+      padding:16px;
+      overflow:hidden;
+      position:relative;
+    }
+
+    .portrait::after{
+      content:"";
+      position:absolute;
+      inset:-40px;
+      background:
+        repeating-linear-gradient(45deg, rgba(255,255,255,.07), rgba(255,255,255,.00) 10px, rgba(255,255,255,.00) 18px);
+      opacity:.35;
+      transform:rotate(3deg);
+      pointer-events:none;
+    }
+
+    .avatar{
+      width:92px;
+      height:92px;
+      border-radius:24px;
+      border:1px solid rgba(255,255,255,.16);
+      background:
+        radial-gradient(50px 40px at 30% 30%, rgba(255,216,77,.55), transparent 60%),
+        radial-gradient(40px 40px at 70% 60%, rgba(255,59,92,.45), transparent 60%),
+        rgba(0,0,0,.15);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:38px;
+      font-weight:900;
+      position:relative;
+      flex:0 0 auto;
+      box-shadow: 0 16px 40px rgba(0,0,0,.25);
+    }
+
+    .avatar span{ position:relative; }
+
+    .intro{
+      flex:1;
+      position:relative;
+    }
+
+    .intro .nameRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .playerName{
+      font-weight:950;
+      font-size:24px;
+      letter-spacing:.4px;
+      margin:0;
+    }
+
+    .shirt{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-end;
+      gap:6px;
+    }
+
+    .shirt .num{
+      padding:8px 12px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(0,0,0,.16);
+      font-size:14px;
+      color:rgba(255,255,255,.88);
+      font-weight:850;
+    }
+
+    .shirt .pos{
+      color:var(--muted);
+      font-size:12px;
+      font-weight:700;
+      text-transform:uppercase;
+      letter-spacing:.3px;
+    }
+
+    .desc{
+      margin:10px 0 0;
+      color:rgba(255,255,255,.82);
+      line-height:1.65;
+      font-size:14px;
+      max-width:70ch;
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:12px;
+    }
+
+    button{
+      cursor:pointer;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.15);
+      background:rgba(255,255,255,.08);
+      color:rgba(255,255,255,.92);
+      padding:10px 12px;
+      font-weight:800;
+      letter-spacing:.2px;
+      transition: transform .12s ease, background .12s ease;
+    }
+    button:hover{ transform: translateY(-1px); background:rgba(255,255,255,.11); }
+    button:active{ transform: translateY(0); }
+
+    .primary{
+      background:linear-gradient(180deg, rgba(255,216,77,.28), rgba(255,216,77,.10));
+      border-color: rgba(255,216,77,.35);
+    }
+
+    .secondary{
+      background:linear-gradient(180deg, rgba(255,59,92,.20), rgba(255,59,92,.08));
+      border-color: rgba(255,59,92,.28);
+    }
+
+    .panel{
+      padding:16px;
+    }
+
+    .panel h2{
+      margin:0 0 10px;
+      font-size:16px;
+      letter-spacing:.2px;
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      margin-bottom:12px;
+    }
+
+    label{
+      color:var(--muted);
+      font-size:12px;
+      font-weight:750;
+      text-transform:uppercase;
+      letter-spacing:.3px;
+    }
+
+    input, select{
+      width:100%;
+      border-radius:14px;
+      padding:11px 12px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(0,0,0,.14);
+      color:var(--text);
+      outline:none;
+      font-weight:700;
+    }
+
+    input::placeholder{ color:rgba(255,255,255,.45); font-weight:650; }
+
+    .rangeRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-top:6px;
+    }
+
+    input[type="range"]{
+      padding:0;
+      height:36px;
+      accent-color: var(--accent);
+    }
+
+    .mini{
+      color:var(--muted);
+      font-size:12px;
+      font-weight:800;
+    }
+
+    .list{
+      margin-top:10px;
+      padding-top:12px;
+      border-top:1px solid rgba(255,255,255,.12);
+      display:grid;
+      gap:10px;
+    }
+
+    .bullet{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      background:rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:16px;
+      padding:10px 10px;
+    }
+
+    .bullet .ico{
+      width:28px; height:28px;
+      border-radius:12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:rgba(255,216,77,.12);
+      border:1px solid rgba(255,216,77,.22);
+      flex:0 0 auto;
+      font-size:14px;
+    }
+
+    .bullet .txt{ display:flex; flex-direction:column; gap:3px; }
+    .bullet .t{ font-weight:900; font-size:13px; }
+    .bullet .d{ color:var(--muted); font-size:12px; line-height:1.35; }
+
+    .footer{
+      margin-top:16px;
+      color:rgba(255,255,255,.55);
+      font-size:12px;
+      text-align:center;
+    }
+
+    /* Print-friendly */
+    @media print{
+      button{ display:none; }
+      body{ background:#fff; color:#000; }
+      .card, .stat, .panel, .bullet{ box-shadow:none; }
+      .footer{ color:#444; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="kicker">
+          <span class="chip">Copa • Perfil de Jogador</span>
+          <span>modo “descrição de elenco”</span>
+        </div>
+        <h1>Crie uma apresentação como se você fosse um atleta da Copa</h1>
+        <p class="sub">Personalize nome, posição e estilo. Em seguida, gere uma descrição pronta para colar em redes sociais, cartilha de torcida ou ficha de jogador.</p>
+      </div>
+    </header>
+
+    <div class="layout">
+      <section class="card" aria-label="Prévia do jogador">
+        <div class="cardHead">
+          <div class="tag"><span class="dot"></span><span id="tagLine">Pronto pra estrear</span></div>
+          <div class="tag" style="background:rgba(0,0,0,.10)"><span style="opacity:.9">🔥</span><span id="mood">Fome de jogo</span></div>
+        </div>
+
+        <div class="statsGrid">
+          <div class="stat"><div class="label">Velocidade</div><div class="value" id="statSpeed">—</div></div>
+          <div class="stat"><div class="label">Criatividade</div><div class="value" id="statCreativity">—</div></div>
+          <div class="stat"><div class="label">Foco</div><div class="value" id="statFocus">—</div></div>
+        </div>
+
+        <div class="hero">
+          <div class="portrait">
+            <div class="avatar" aria-hidden="true"><span id="avatarLetter">★</span></div>
+            <div class="intro">
+              <div class="nameRow">
+                <h2 class="playerName" id="playerName">—</h2>
+                <div class="shirt">
+                  <div class="num">#<span id="playerNumber">—</span></div>
+                  <div class="pos" id="playerPosition">—</div>
+                </div>
+              </div>
+              <p class="desc" id="playerDesc">—</p>
+
+              <div class="actions">
+                <button class="primary" id="btnGenerate">Gerar descrição</button>
+                <button class="secondary" id="btnCopy">Copiar texto</button>
+                <button id="btnPrint" title="Salvar em PDF via impressão">Imprimir / PDF</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="footer">Dica: Ajuste o “ritmo” para deixar a narração mais explosiva ou mais controlada.</div>
+        </div>
+      </section>
+
+      <aside class="card" aria-label="Configurações do jogador">
+        <div class="panel">
+          <h2>Configurações</h2>
+
+          <div class="field">
+            <label for="name">Nome do jogador</label>
+            <input id="name" placeholder="Ex: Lucas do Ataque" maxlength="40" />
+          </div>
+
+          <div class="field">
+            <label for="number">Número da camisa</label>
+            <input id="number" type="number" min="1" max="99" placeholder="Ex: 10" />
+          </div>
+
+          <div class="field">
+            <label for="position">Posição</label>
+            <select id="position">
+              <option value="Atacante">Atacante</option>
+              <option value="Meio-campo">Meio-campo</option>
+              <option value="Volante">Volante</option>
+              <option value="Lateral">Lateral</option>
+              <option value="Zagueiro">Zagueiro</option>
+              <option value="Goleiro">Goleiro</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="style">Estilo de jogo</label>
+            <select id="style">
+              <option value="pressão alta">Pressão alta</option>
+              <option value="controle e passe">Controle e passe</option>
+              <option value="toques rápidos">Toques rápidos</option>
+              <option value="correria e profundidade">Correria e profundidade</option>
+              <option value="bola parada">Bola parada</option>
+              <option value="organização defensiva">Organização defensiva</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="tempo">Ritmo (narração)</label>
+            <div class="rangeRow">
+              <span class="mini" id="tempoLabel">—</span>
+              <span class="mini" id="tempoValue">50</span>
+            </div>
+            <input id="tempo" type="range" min="0" max="100" value="50" />
+          </div>
+
+          <div class="field">
+            <label for="call">Chamada do jogador</label>
+            <input id="call" placeholder="Ex: Hoje eu vim pra virar o jogo" maxlength="60" />
+          </div>
+
+          <div class="list" aria-label="Diferenciais">
+            <div class="bullet">
+              <div class="ico">⚡</div>
+              <div class="txt">
+                <div class="t">Personalidade</div>
+                <div class="d">Você escolhe o tom: explosivo, elegante ou estratégico.</div>
+              </div>
+            </div>
+            <div class="bullet">
+              <div class="ico">🎯</div>
+              <div class="txt">
+                <div class="t">Impacto</div>
+                <div class="d">A descrição é construída para soar como ficha oficial.</div>
+              </div>
+            </div>
+            <div class="bullet">
+              <div class="ico">🧠</div>
+              <div class="txt">
+                <div class="t">Consistência</div>
+                <div class="d">Os atributos mudam juntos: velocidade, criatividade e foco.</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    const el = {
+      tagLine: $('tagLine'),
+      mood: $('mood'),
+      avatarLetter: $('avatarLetter'),
+      playerName: $('playerName'),
+      playerNumber: $('playerNumber'),
+      playerPosition: $('playerPosition'),
+      playerDesc: $('playerDesc'),
+      statSpeed: $('statSpeed'),
+      statCreativity: $('statCreativity'),
+      statFocus: $('statFocus'),
+      tempo: $('tempo'),
+      tempoLabel: $('tempoLabel'),
+      tempoValue: $('tempoValue'),
+      name: $('name'),
+      number: $('number'),
+      position: $('position'),
+      style: $('style'),
+      call: $('call'),
+      btnGenerate: $('btnGenerate'),
+      btnCopy: $('btnCopy'),
+      btnPrint: $('btnPrint')
+    };
+
+    const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
+
+    function seededPick(arr, seed){
+      // seed -> pseudo hash
+      let x = 0;
+      const s = String(seed);
+      for (let i=0;i<s.length;i++) x = (x*31 + s.charCodeAt(i)) >>> 0;
+      return arr[x % arr.length];
+    }
+
+    function calcStats({tempo, position, style}){
+      // tempo: 0..100
+      const t = clamp(Number(tempo), 0, 100);
+
+      // base from position
+      const pos = String(position);
+      const styleStr = String(style);
+
+      let speedBase = 50, creatBase = 50, focusBase = 50;
+
+      if (pos === 'Atacante') { speedBase = 70; creatBase = 66; focusBase = 58; }
+      if (pos === 'Meio-campo') { speedBase = 60; creatBase = 74; focusBase = 64; }
+      if (pos === 'Volante') { speedBase = 62; creatBase = 58; focusBase = 78; }
+      if (pos === 'Lateral') { speedBase = 72; creatBase = 60; focusBase = 66; }
+      if (pos === 'Zagueiro') { speedBase = 54; creatBase = 52; focusBase = 80; }
+      if (pos === 'Goleiro') { speedBase = 48; creatBase = 54; focusBase = 86; }
+
+      // style modifiers
+      const mod = (key, amt) => {
+        if (styleStr.includes(key)) {
+          speedBase += amt.speed ?? 0;
+          creatBase += amt.creat ?? 0;
+          focusBase += amt.focus ?? 0;
+        }
+      };
+      mod('pressão alta', {speed: 10, creat: 6, focus: 4});
+      mod('controle e passe', {speed: -4, creat: 12, focus: 8});
+      mod('toques rápidos', {speed: 8, creat: 10, focus: -2});
+      mod('correria e profundidade', {speed: 14, creat: 6, focus: 0});
+      mod('bola parada', {speed: -2, creat: 12, focus: 6});
+      mod('organização defensiva', {speed: -3, creat: 2, focus: 14});
+
+      // tempo shapes narration
+      // explosivo -> mais velocidade/creatividade
+      // controlado -> mais foco
+      const speed = clamp(Math.round(speedBase + (t-50)*0.35 + (t>70? 6:0)), 20, 99);
+      const creativity = clamp(Math.round(creatBase + (t-50)*0.25 + (styleStr.includes('passe')? 4:0)), 20, 99);
+      const focus = clamp(Math.round(focusBase + (50-t)*0.25 + (t<30? 8:0)), 20, 99);
+
+      return {speed, creativity, focus};
+    }
+
+    function buildDescription({name, number, position, style, tempo, call}){
+      const t = clamp(Number(tempo), 0, 100);
+      const fast = t >= 60;
+      const veryFast = t >= 80;
+
+      const openers = [
+        'Na Copa, ele chega como quem não espera o apito: acelera o jogo e manda ver.',
+        'É daqueles que transformam espaço em oportunidade — e oportunidade em história.',
+        'Quando o estádio vibra, ele entende o recado: jogar com coragem é parte do trabalho.'
+      ];
+
+      const verbsByStyle = {
+        'pressão alta': ['empurra o adversário', 'toma a iniciativa na saída', 'fecha linhas com intensidade'],
+        'controle e passe': ['segura o ritmo', 'encurta o campo com passes', 'guia o time com calma perigosa'],
+        'toques rápidos': ['quebra marcações com toques', 'surpreende no primeiro contato', 'faz o jogo correr onde quer'],
+        'correria e profundidade': ['abre velocidade na corrida', 'ataca o espaço por trás', 'puxa o time para frente'],
+        'bola parada': ['vira alvo certeiro nas jogadas ensaiadas', 'cria perigo no detalhe', 'assina o lance com precisão'],
+        'organização defensiva': ['organiza o caos', 'lê o lance antes da pressão', 'faz a defesa respirar e decidir']
+      };
+
+      const roleByPos = {
+        'Atacante': ['ameaça o gol em cada transição', 'gira no tempo certo', 'pede a bola e transforma em finalização'],
+        'Meio-campo': ['mexe na engrenagem do time', 'costura jogadas com visão', 'carrega a bola e encontra companheiros livres'],
+        'Volante': ['faz o meio ficar firme', 'desarma e inicia com intenção', 'equilibra o jogo sem perder a agressividade'],
+        'Lateral': ['ataca por fora com coragem', 'apoia e cruza com timing', 'protege as costas e sobe quando vale'],
+        'Zagueiro': ['segura a linha e combate no corpo a corpo', 'ganha disputa aérea com presença', 'fecha o espaço e organiza a saída'],
+        'Goleiro': ['lê reflexos com tranquilidade', 'comanda a área com autoridade', 'se antecipa e corta o perigo antes dele nascer']
+      };
+
+      const tempoFlavor = fast
+        ? (veryFast
+          ? 'O ritmo é de incêndio: ele acelera, insiste e força o erro do outro time.'
+          : 'O ritmo é alto, mas com leitura: ele ataca quando o momento pede.')
+        : 'O ritmo é mais de controle: ele toca, administra e espera o timing exato pra golpear.';
+
+      const callLine = call && call.trim().length
+        ? `Sua chamada ecoa no vestiário: “${call.trim()}”.`
+        : 'Sua chamada é simples e direta: jogar com intensidade, sem medo de assumir.';
+
+      const opener = seededPick(openers, name + number + tempo + position);
+
+      const styleKey = String(style);
+      const styleVerbs = verbsByStyle[styleKey] ?? ['cria oportunidades com força', 'impõe presença no jogo', 'faz o time crescer no confronto'];
+
+      const roleArr = roleByPos[position] ?? ['faz acontecer no tempo certo', 'carrega o jogo', 'transforma oportunidade em impacto'];
+
+      const v1 = seededPick(styleVerbs, styleKey + tempo);
+      const v2 = seededPick(roleArr, position + number);
+
+      return [
+        opener,
+        `Com ${position.toLowerCase()} e ${style.toLowerCase()}, ele ${v1}.`,
+        `Ele também ${v2}.`,
+        tempoFlavor,
+        callLine,
+        `Camisa ${number ? '#'+number : '—'}: presença, leitura e aquele detalhe que muda o placar.`
+      ].join(' ');
+    }
+
+    function updateTempoLabel(){
+      const t = Number(el.tempo.value);
+      el.tempoValue.textContent = String(t);
+      if (t < 30) el.tempoLabel.textContent = 'Controlado';
+      else if (t < 60) el.tempoLabel.textContent = 'Equilibrado';
+      else if (t < 80) el.tempoLabel.textContent = 'Intenso';
+      else el.tempoLabel.textContent = 'Explosivo';
+    }
+
+    async function copyText(text){
+      try{
+        await navigator.clipboard.writeText(text);
+        el.btnCopy.textContent = 'Copiado ✓';
+        setTimeout(()=> el.btnCopy.textContent = 'Copiar texto', 1200);
+      }catch{
+        // fallback
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        el.btnCopy.textContent = 'Copiado ✓';
+        setTimeout(()=> el.btnCopy.textContent = 'Copiar texto', 1200);
+      }
+    }
+
+    function syncPreview(){
+      const name = el.name.value.trim() || 'Jogador da Copa';
+      const number = el.number.value ? String(el.number.value).trim() : '—';
+      const position = el.position.value;
+      const style = el.style.value;
+      const tempo = Number(el.tempo.value);
+      const call = el.call.value.trim();
+
+      el.avatarLetter.textContent = name.slice(0,1).toUpperCase();
+      el.playerName.textContent = name;
+      el.playerNumber.textContent = number;
+      el.playerPosition.textContent = position;
+
+      const {speed, creativity, focus} = calcStats({tempo, position, style});
+      el.statSpeed.textContent = String(speed);
+      el.statCreativity.textContent = String(creativity);
+      el.statFocus.textContent = String(focus);
+
+      const desc = buildDescription({name, number, position, style, tempo, call});
+      el.playerDesc.textContent = desc;
+
+      // tag/mood
+      const mood = tempo < 30 ? 'Raciocínio' : tempo < 60 ? 'Inteligência' : tempo < 80 ? 'Fúria bonita' : 'Modo ataque';
+      el.mood.textContent = mood;
+
+      const line = tempo < 30 ? 'Estratégia em campo' : tempo < 60 ? 'Ritmo na medida' : tempo < 80 ? 'Pressão constante' : 'Correr e decidir';
+      el.tagLine.textContent = line;
+    }
+
+    el.tempo.addEventListener('input', () => {
+      updateTempoLabel();
+      syncPreview();
+    });
+
+    ['input','change'].forEach(evt => {
+      el.name.addEventListener(evt, syncPreview);
+      el.number.addEventListener(evt, syncPreview);
+      el.position.addEventListener(evt, syncPreview);
+      el.style.addEventListener(evt, syncPreview);
+      el.call.addEventListener(evt, syncPreview);
+    });
+
+    el.btnGenerate.addEventListener('click', () => {
+      syncPreview();
+      // small feedback
+      el.btnGenerate.textContent = 'Descrição gerada ✓';
+      setTimeout(()=> el.btnGenerate.textContent = 'Gerar descrição', 1200);
+    });
+
+    el.btnCopy.addEventListener('click', () => {
+      const text = el.playerDesc.textContent;
+      copyText(text);
+    });
+
+    el.btnPrint.addEventListener('click', () => window.print());
+
+    // init
+    updateTempoLabel();
+    syncPreview();
+  </script>
+</body>
+</html>
+
